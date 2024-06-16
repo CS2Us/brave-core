@@ -9,6 +9,7 @@ const fs = require('fs')
 const path = require('path')
 const Log = require('./logging')
 const util = require('./util')
+const ADMZip = require('adm-zip')
 
 // The .disable_auto_update file in the depot_tools directory, regardless of
 // its content, disables auto-updates. If a specific depot_tools reference is
@@ -106,11 +107,17 @@ function installDepotTools(options = config.defaultOptions) {
 
     if (!fs.existsSync(config.depotToolsDir) || wasInterrupted) {
       Log.progressScope('install depot_tools', () => {
-        util.run(
-          'git',
-          ['clone', config.depotToolsRepo, config.depotToolsDir],
-          options
-        )
+        if (process.platform == 'win32') {
+          const zipPath = config.depotToolsDir + '/../' + 'depot_tools.zip'
+          const unzip = new ADMZip(zipPath)
+          unzip.extractAllTo(/*target path*/config.depotToolsDir, /*overwrite*/true);
+        } else {
+          util.run(
+            'git',
+            ['clone', config.depotToolsRepo, config.depotToolsDir],
+            options
+          )
+        }
       })
     }
 

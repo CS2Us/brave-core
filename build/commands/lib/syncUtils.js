@@ -123,7 +123,8 @@ function syncChromium(program) {
     '--revision',
     'src@' + requiredChromiumRef,
     '--reset',
-    '--upstream'
+    '--upstream',
+    '--no-history'
   ]
 
   if (program.fetch_all) {

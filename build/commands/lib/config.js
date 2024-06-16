@@ -97,6 +97,16 @@ const getDepotToolsDir = (rootDir) => {
   return path.normalize(depotToolsDir)
 }
 
+const getDepotToolsDepo = (rootDir) => {
+  let depotToolsDepo
+  if (process.platform === 'win32') {
+    depotToolsDepo = getEnvConfig(['projects', 'depot_tools', 'repository', 'zipurl'])
+  } else {
+    depotToolsDepo = getEnvConfig(['projects', 'depot_tools', 'repository', 'url'])
+  }
+  return depotToolsDepo
+}
+
 const parseExtraInputs = (inputs, accumulator, callback) => {
   for (let input of inputs) {
     let separatorIndex = input.indexOf(':')
@@ -141,7 +151,7 @@ const Config = function () {
   this.buildToolsDir = path.join(this.srcDir, 'build')
   this.resourcesDir = path.join(this.rootDir, 'resources')
   this.depotToolsDir = getDepotToolsDir(this.braveCoreDir)
-  this.depotToolsRepo = getEnvConfig(['projects', 'depot_tools', 'repository', 'url'])
+  this.depotToolsRepo = getDepotToolsDepo(this.braveCoreDir)
   this.defaultGClientFile = path.join(this.rootDir, '.gclient')
   this.gClientFile = process.env.BRAVE_GCLIENT_FILE || this.defaultGClientFile
   this.gClientVerbose = getEnvConfig(['gclient_verbose']) || false
