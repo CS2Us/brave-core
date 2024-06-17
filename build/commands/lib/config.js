@@ -98,12 +98,7 @@ const getDepotToolsDir = (rootDir) => {
 }
 
 const getDepotToolsDepo = (rootDir) => {
-  let depotToolsDepo
-  if (process.platform === 'win32') {
-    depotToolsDepo = getEnvConfig(['projects', 'depot_tools', 'repository', 'zipurl'])
-  } else {
-    depotToolsDepo = getEnvConfig(['projects', 'depot_tools', 'repository', 'url'])
-  }
+  let depotToolsDepo = getEnvConfig(['projects', 'depot_tools', 'repository', 'url'])
   return depotToolsDepo
 }
 

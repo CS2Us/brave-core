@@ -9,7 +9,6 @@ const fs = require('fs')
 const path = require('path')
 const Log = require('./logging')
 const util = require('./util')
-const ADMZip = require('adm-zip')
 
 // The .disable_auto_update file in the depot_tools directory, regardless of
 // its content, disables auto-updates. If a specific depot_tools reference is
@@ -72,7 +71,7 @@ function removeDepotTools() {
 function installDepotTools(options = config.defaultOptions) {
   options.cwd = config.braveCoreDir
 
-  const enforcedDepotToolsRef = config.getProjectRef('depot_tools', null)
+  let enforcedDepotToolsRef = config.getProjectRef('depot_tools', null) ?? readEnforcedDepotToolsRef()
   if (enforcedDepotToolsRef && !isDepotToolsRefValid(enforcedDepotToolsRef)) {
     Log.error(
       `Invalid depot_tools ref: ${enforcedDepotToolsRef}. ` +
@@ -106,19 +105,12 @@ function installDepotTools(options = config.defaultOptions) {
     }
 
     if (!fs.existsSync(config.depotToolsDir) || wasInterrupted) {
-      Log.progressScope('install depot_tools', () => {
-        if (process.platform == 'win32') {
-          const zipPath = config.depotToolsDir + '/../' + 'depot_tools.zip'
-          const unzip = new ADMZip(zipPath)
-          unzip.extractAllTo(/*target path*/config.depotToolsDir, /*overwrite*/true);
-        } else {
-          util.run(
-            'git',
-            ['clone', config.depotToolsRepo, config.depotToolsDir],
-            options
-          )
-        }
-      })
+      util.run(
+        'git',
+        ['clone', config.depotToolsRepo, config.depotToolsDir],
+        options
+      )
+      enforcedDepotToolsRef = util.runGit(config.depotToolsDir, ['rev-parse', 'HEAD'])
     }
 
     if (enforcedDepotToolsRef !== readEnforcedDepotToolsRef()) {
